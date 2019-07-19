@@ -26,6 +26,7 @@ namespace _8PuzzleProject
         {
             InitializeComponent();
         }
+
         class PuzzlePiece
         {
             public Image image { get; set; }
@@ -34,11 +35,23 @@ namespace _8PuzzleProject
             public int newPos_X { get; set; }
             public int newPos_Y { get; set; }
         }
+
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-
+            for (int i = 0; i < 3; i++)
+            {
+                var list = new List<PuzzlePiece>();
+                for (int j = 0; j < 3; j++)
+                {
+                    var image = new PuzzlePiece();
+                    list.Add(image);
+                }
+                scrambledList.Add(list);
+            }
         }
-        List<PuzzlePiece> puzzlePieceList= new List<PuzzlePiece>();
+
+        List<List<PuzzlePiece>> puzzlePieceList = new List<List<PuzzlePiece>>();
+        List<List<PuzzlePiece>> scrambledList = new List<List<PuzzlePiece>>();
         Image[,] images = new Image[3, 3];
         int croppedImageWidth;
         int croppedImageHeight;
@@ -50,11 +63,35 @@ namespace _8PuzzleProject
 
             if (screen.ShowDialog() == true)
             {
+                puzzlePieceList = new List<List<PuzzlePiece>>();
+                container.Children.Clear();
                 var coreImage = new BitmapImage(new Uri(screen.FileName));
-                var coreImageWidth = 300;
+                var coreImageWidth = 420;
                 croppedImageWidth = (int)coreImageWidth / 3;
                 croppedImageHeight = (int)(coreImageWidth * coreImage.Height / coreImage.Width) / 3;
-                
+
+                for (int i = 0; i < 3; i++)
+                {
+                    var list = new List<PuzzlePiece>();
+                    for (int j = 0; j < 3; j++)
+                    {
+                        if (i != 2 || j != 2)
+                        {
+                            var croppedImage = new CroppedBitmap(coreImage, new Int32Rect(
+                                    (int)(j * coreImage.Width / 3), (int)(i * coreImage.Height / 3),
+                                    (int)coreImage.Width / 3, (int)coreImage.Height / 3));
+                            var imagePiece = new PuzzlePiece() { image = new Image() { Source = croppedImage, Width = croppedImageWidth, Height = croppedImageHeight } };
+                            //container.Children.Add(imagePiece.image);
+                            imagePiece.originalPos_X = j * (croppedImageWidth + croppedImagePadding);
+                            imagePiece.originalPos_Y = i * (croppedImageHeight + croppedImagePadding);
+                            list.Add(imagePiece);
+                            //Canvas.SetLeft(imagePiece.image, imagePiece.originalPos_X);
+                            //Canvas.SetTop(imagePiece.image, imagePiece.originalPos_Y);
+                        }
+                    }
+                    puzzlePieceList.Add(list);
+                }
+
                 var rng = new Random();
                 var pool = new List<int> { 0, 1, 2, 3, 4, 5, 6, 7 };
                 var pooli = new List<int> { 0, 0, 0, 1, 1, 1, 2, 2 };
@@ -62,6 +99,7 @@ namespace _8PuzzleProject
 
                 for (int i = 0; i < 3; i++)
                 {
+                    //var list = new List<PuzzlePiece>();
                     for (int j = 0; j < 3; j++)
                     {
                         if (i != 2 || j != 2)
@@ -69,23 +107,18 @@ namespace _8PuzzleProject
                             // Set vi tri
                             var k = rng.Next(pool.Count); // Chon ngau nhien mot chi muc trong pool
 
-                            var croppedImage = new CroppedBitmap(coreImage, new Int32Rect(
-                                (int)(pooli[k] * coreImage.Width / 3), (int)(poolj[k] * coreImage.Height / 3),
-                                (int)coreImage.Width / 3, (int)coreImage.Height / 3));
-                            var imagePiece = new PuzzlePiece() { image = new Image() { Source = croppedImage, Width = croppedImageWidth, Height = croppedImageHeight} };
+                            var imagePiece = puzzlePieceList[i][j];
                             // Tao giao dien
-                            var imageView = new Image();
-                            imageView.Source = croppedImage;
-                            imageView.Width = croppedImageWidth;
-                            imageView.Height = croppedImageHeight;
                             container.Children.Add(imagePiece.image);
+                            imagePiece.newPos_X = poolj[k] * (croppedImageWidth + croppedImagePadding);
+                            imagePiece.newPos_Y = pooli[k] * (croppedImageHeight + croppedImagePadding);
 
-                            //
-                            Canvas.SetLeft(imagePiece.image, j * (croppedImageWidth + croppedImagePadding));
-                            Canvas.SetTop(imagePiece.image, i * (croppedImageHeight + croppedImagePadding));
+                            scrambledList[pooli[k]].Insert(poolj[k], imagePiece);
+                            scrambledList[pooli[k]].RemoveAt(poolj[k]+1);
 
-                            images[i, j] = imagePiece.image;
-
+                            //list.Add(imagePiece);
+                            Canvas.SetLeft(imagePiece.image, imagePiece.newPos_X);
+                            Canvas.SetTop(imagePiece.image, imagePiece.newPos_Y);
                             pool.RemoveAt(k);
                             pooli.RemoveAt(k);
                             poolj.RemoveAt(k);
@@ -94,61 +127,89 @@ namespace _8PuzzleProject
                 }
             }
         }
-
+        int canvasLeftPadding = 52;
+        int canvasTopPadding = 42;
         bool isDragging = false;
-        Image selectedImage = null;
+        PuzzlePiece selectedPiece = new PuzzlePiece();
         int newi = -1;
         int newj = -1;
-
+        int leftBorder = 52;
+        int rightBorder = 435 + 50;
+        int topBorder = 42;
+        int bottomBorder = 435 + 40;
         private void Container_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             isDragging = true;
             var position = e.GetPosition(this);
-            //if(position.X)
+            //legal mouse click
+            if (position.X < leftBorder && position.X > rightBorder || position.Y < topBorder && position.Y > bottomBorder)
+            {
+                return;
+            }
             //
-            var j = (int)(position.X / (croppedImageWidth + croppedImagePadding));
-            var i = (int)(position.Y / (croppedImageHeight + croppedImagePadding));
+            var j = (int)((position.X - canvasLeftPadding) / (croppedImageWidth + croppedImagePadding));
+            var i = (int)((position.Y - canvasTopPadding) / (croppedImageHeight + croppedImagePadding));
 
             this.Title = $"{i} - {j}";
-
-            selectedImage = images[i, j];
-            images[i, j] = null;
+            if (!scrambledList[i].Any())
+            {
+                return;
+            }
+            if (scrambledList[i][j] == null)
+            {
+                return;
+            }
+            selectedPiece = scrambledList[i][j];
+            scrambledList[i][j] = null;
         }
 
         private void Container_MouseMove(object sender, MouseEventArgs e)
         {
             if (isDragging)
             {
+                if (selectedPiece == null)
+                    return;
+
                 var newPos = e.GetPosition(this);
                 // Toa do moi
                 //
-                var j = (int)(newPos.X / (croppedImageWidth + croppedImagePadding));
-                var i = (int)(newPos.Y / (croppedImageHeight + croppedImagePadding));
+                
+                var j = (int)((newPos.X - canvasLeftPadding) / (croppedImageWidth + croppedImagePadding ));
+                var i = (int)((newPos.Y - canvasTopPadding) / (croppedImageHeight + croppedImagePadding));
 
-                this.Title = $"{i} - {j}";
+                this.Title = $"{i} - {j} {newPos.X} - {newPos.Y}";
 
                 //
+                Canvas.SetLeft(selectedPiece.image, newPos.X - canvasLeftPadding);
+                Canvas.SetTop(selectedPiece.image, newPos.Y - canvasTopPadding);
                 newi = i;
                 newj = j;
-
-                Canvas.SetLeft(selectedImage, newPos.X);
-                Canvas.SetTop(selectedImage, newPos.Y);
             }
         }
 
         private void Container_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             isDragging = false;
-            if (selectedImage != null && images[newi, newj] == null)
-            { 
-                Canvas.SetLeft(selectedImage, newj * (croppedImageWidth + croppedImagePadding));
-                Canvas.SetTop(selectedImage, newi * (croppedImageHeight + croppedImagePadding));
-                images[newi, newj] = selectedImage;
+            if (selectedPiece != null)
+            {
+                Canvas.SetLeft(selectedPiece.image, newj * (croppedImageWidth + croppedImagePadding));
+                Canvas.SetTop(selectedPiece.image, newi * (croppedImageHeight + croppedImagePadding));
+                scrambledList[newi][newj] = selectedPiece;
+                selectedPiece = null;
             }
             else
             {
                 return;
             }
+        }
+        private void StartGame_Clicked(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void PauseButton_Clicked(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

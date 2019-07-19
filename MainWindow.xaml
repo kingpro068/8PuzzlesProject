@@ -5,11 +5,29 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:_8PuzzleProject"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800" Loaded="Window_Loaded">
-    <Canvas Background="White" Name="container" MouseLeftButtonDown="Container_MouseLeftButtonDown"
+        Title="MainWindow" Height="520" Width="700" Loaded="Window_Loaded" WindowStartupLocation="CenterScreen" SizeToContent="WidthAndHeight" ResizeMode="CanMinimize">
+    <DockPanel LastChildFill="True">
+        <DockPanel DockPanel.Dock="Right" Width="150">
+            <Label DockPanel.Dock="Top" Content="Timer" FontSize="16"></Label>
+            <TextBlock DockPanel.Dock="Top" Height="40"></TextBlock>
+            <Button Width="100" Height="40" DockPanel.Dock="Top" Content="Start" FontSize="16" Margin="0,10,0,0" Click="StartGame_Clicked"></Button>
+            <Button Width="100" Height="40" DockPanel.Dock="Top" Content="Pause" FontSize="16" Margin="0,10,0,0" Click="PauseButton_Clicked"></Button>
+            <Button Width="50" Height="40" DockPanel.Dock="Bottom" Content="Hint?"  FontSize="16"></Button>
+            <Grid></Grid>
+        </DockPanel>
+        <ToolBarTray Background="AliceBlue" DockPanel.Dock="Top" HorizontalAlignment="Stretch">
+            <ToolBar Background="AliceBlue" Height="40" Width="500" HorizontalAlignment="Stretch">
+                <Button Name="openButton" Content="Open file..." FontSize="16" Click="OpenButton_Click"/>
+                <Separator/>
+                <Button Content="Save" FontSize="16"></Button>
+            </ToolBar>
+        </ToolBarTray>
+
+        <Border HorizontalAlignment="Left" Margin="50,0,0,0" Height="435" Width="435" BorderBrush="Aquamarine" BorderThickness="2">
+            <Canvas Background="White" Name="container" MouseLeftButtonDown="Container_MouseLeftButtonDown"
             MouseMove="Container_MouseMove"
             MouseLeftButtonUp="Container_MouseLeftButtonUp">
-
-        <Button Name="openButton" Content="Open file..." Width="80" Height="25" Click="OpenButton_Click"/>
-    </Canvas>
+            </Canvas>
+        </Border>
+    </DockPanel>
 </Window>
