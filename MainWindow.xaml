@@ -9,7 +9,7 @@
     <DockPanel LastChildFill="True">
         <DockPanel DockPanel.Dock="Right" Width="150">
             <Label DockPanel.Dock="Top" Content="Timer" FontSize="16"></Label>
-            <TextBlock DockPanel.Dock="Top" Height="40"></TextBlock>
+            <TextBlock Name="TimerTextBlock" DockPanel.Dock="Top" Height="40" Text="03:00" FontSize="30" HorizontalAlignment="Center" FontWeight="DemiBold"></TextBlock>
             <Button Width="100" Height="40" DockPanel.Dock="Top" Content="Start" FontSize="16" Margin="0,10,0,0" Click="StartGame_Clicked"></Button>
             <Button Width="100" Height="40" DockPanel.Dock="Top" Content="Pause" FontSize="16" Margin="0,10,0,0" Click="PauseButton_Clicked"></Button>
             <Button Width="50" Height="40" DockPanel.Dock="Bottom" Content="Hint?"  FontSize="16"></Button>

@@ -14,6 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Timers;
 
 namespace _8PuzzleProject
 {
@@ -202,14 +203,35 @@ namespace _8PuzzleProject
                 return;
             }
         }
+
+        //ADD REFERENCE System.Windows.Forms
+        System.Windows.Forms.Timer timerX;
         private void StartGame_Clicked(object sender, RoutedEventArgs e)
         {
+            timerX = new System.Windows.Forms.Timer();
 
+            timerX.Interval = 1000;
+            timerX.Tick += new EventHandler(timeX_Tick);
+            timerX.Enabled = true;
+        }
+
+        int OrigTime = 180;
+        private void timeX_Tick(object sender, EventArgs e)
+        {
+            if (OrigTime > 0)
+            {
+                OrigTime--;
+                TimerTextBlock.Text = OrigTime / 60 + ":" + ((OrigTime % 60) >= 10 ? (OrigTime % 60).ToString() : "0" + OrigTime % 60);
+            }
+            else
+            {
+                timerX.Stop();
+            }
         }
 
         private void PauseButton_Clicked(object sender, RoutedEventArgs e)
         {
-
+            timerX.Stop();
         }
     }
 }
