@@ -144,6 +144,11 @@ namespace _8PuzzleProject
         int bottomBorder = 435 + 40;
         private void Container_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
+            if(!isStart)
+            {
+                return;
+            }
+
             isDragging = true;
             var position = e.GetPosition(this);
             //legal mouse click
@@ -194,6 +199,9 @@ namespace _8PuzzleProject
 
         private void Container_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
+            if (!isStart)
+                return;
+
             isDragging = false;
             if (scrambledList[newi][newj] == null)
             {
@@ -215,13 +223,26 @@ namespace _8PuzzleProject
 
         //ADD REFERENCE System.Windows.Forms
         System.Windows.Forms.Timer timerX;
+        bool isStart = false;
+
         private void StartGame_Clicked(object sender, RoutedEventArgs e)
         {
-            timerX = new System.Windows.Forms.Timer();
+            StartButton.Content = "Pause";
+            isStart = !isStart;
+            
+            if(isStart)
+            {
+                timerX = new System.Windows.Forms.Timer();
 
-            timerX.Interval = 1000;
-            timerX.Tick += new EventHandler(timeX_Tick);
-            timerX.Enabled = true;
+                timerX.Interval = 1000;
+                timerX.Tick += new EventHandler(timeX_Tick);
+                timerX.Enabled = true;
+            }
+            else
+            {
+                StartButton.Content = "Start";
+                timerX.Stop();
+            }
         }
 
         public int BaseScore { get; set; }
@@ -241,11 +262,6 @@ namespace _8PuzzleProject
                 timerX.Stop();
                 MessageBox.Show("TIME UP!!");
             }
-        }
-
-        private void PauseButton_Clicked(object sender, RoutedEventArgs e)
-        {
-            timerX.Stop();
         }
     }
 }
