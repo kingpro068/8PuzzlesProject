@@ -49,6 +49,7 @@ namespace _8PuzzleProject
                 }
                 scrambledList.Add(list);
             }
+            scrambledList[2][2] = null;
         }
 
         List<List<PuzzlePiece>> puzzlePieceList = new List<List<PuzzlePiece>>();
@@ -179,7 +180,7 @@ namespace _8PuzzleProject
                 var i = (int)((newPos.Y - canvasTopPadding) / (croppedImageHeight + croppedImagePadding));
 
                 this.Title = $"{i} - {j} {newPos.X} - {newPos.Y}";
-
+                
                 //
                 Canvas.SetLeft(selectedPiece.image, newPos.X - canvasLeftPadding);
                 Canvas.SetTop(selectedPiece.image, newPos.Y - canvasTopPadding);
@@ -191,15 +192,20 @@ namespace _8PuzzleProject
         private void Container_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             isDragging = false;
-            if (selectedPiece != null)
+            if (scrambledList[newi][newj] == null)
             {
-                Canvas.SetLeft(selectedPiece.image, newj * (croppedImageWidth + croppedImagePadding));
-                Canvas.SetTop(selectedPiece.image, newi * (croppedImageHeight + croppedImagePadding));
+                selectedPiece.newPos_X = newj * (croppedImageWidth + croppedImagePadding);
+                selectedPiece.newPos_Y = newi * (croppedImageHeight + croppedImagePadding);
+                Canvas.SetLeft(selectedPiece.image, selectedPiece.newPos_X);
+                Canvas.SetTop(selectedPiece.image, selectedPiece.newPos_Y);
+                
                 scrambledList[newi][newj] = selectedPiece;
                 selectedPiece = null;
             }
             else
             {
+                Canvas.SetLeft(selectedPiece.image, selectedPiece.newPos_X);
+                Canvas.SetTop(selectedPiece.image, selectedPiece.newPos_Y);
                 return;
             }
         }
