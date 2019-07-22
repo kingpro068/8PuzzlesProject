@@ -39,6 +39,9 @@ namespace _8PuzzleProject
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            BaseScore = 1000;
+            BaseScoreTextBlock.Text = BaseScore.ToString();
+
             for (int i = 0; i < 3; i++)
             {
                 var list = new List<PuzzlePiece>();
@@ -221,17 +224,22 @@ namespace _8PuzzleProject
             timerX.Enabled = true;
         }
 
-        int OrigTime = 180;
+        public int BaseScore { get; set; }
+   
+        int OrigTime = 200;
         private void timeX_Tick(object sender, EventArgs e)
         {
             if (OrigTime > 0)
             {
                 OrigTime--;
+                BaseScore -= 5;
                 TimerTextBlock.Text = OrigTime / 60 + ":" + ((OrigTime % 60) >= 10 ? (OrigTime % 60).ToString() : "0" + OrigTime % 60);
+                BaseScoreTextBlock.Text = BaseScore.ToString();
             }
             else
             {
                 timerX.Stop();
+                MessageBox.Show("TIME UP!!");
             }
         }
 
