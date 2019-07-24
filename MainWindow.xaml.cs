@@ -26,10 +26,12 @@ namespace _8PuzzleProject
     /// </summary>
     public partial class MainWindow : Window
     {
-        public MainWindow()
+        class DogTag
         {
-            InitializeComponent();
+            public int cord_X { get; set; }
+            public int cord_Y { get; set; }
         }
+
 
         int canvasLeftPadding = 52;
         int canvasTopPadding = 42;
@@ -45,6 +47,7 @@ namespace _8PuzzleProject
         class PuzzlePiece
         {
             public Image image { get; set; }
+            public DogTag numTag { get; set; }
             public int originalPos_X { get; set; }
             public int originalPos_Y { get; set; }
             public int newPos_X { get; set; }
@@ -54,6 +57,9 @@ namespace _8PuzzleProject
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             BaseScore = 1000;
+            //Add Input Time 
+            string time = TimerTextBox.Text;
+            OrigTime = (int)System.TimeSpan.Parse(time).TotalSeconds;
             BaseScoreTextBlock.Text = BaseScore.ToString();
 
             for (int i = 0; i < 3; i++)
@@ -73,6 +79,7 @@ namespace _8PuzzleProject
             bottomBorder = container.Height + canvasTopPadding;
         }
 
+
         List<List<PuzzlePiece>> puzzlePieceList = new List<List<PuzzlePiece>>();
         List<List<PuzzlePiece>> scrambledList = new List<List<PuzzlePiece>>();
         Image[,] images = new Image[3, 3];
@@ -86,14 +93,15 @@ namespace _8PuzzleProject
 
             if (screen.ShowDialog() == true)
             {
+                imageSource = screen.FileName;
                 puzzlePieceList = new List<List<PuzzlePiece>>();
                 container.Children.Clear();
-                var coreImage = new BitmapImage(new Uri(screen.FileName));
-                //coreImage.BeginInit();
-                //coreImage.UriSource = new Uri(screen.FileName);
-                //coreImage.DecodePixelHeight = 420;
-                //coreImage.DecodePixelWidth = 420;
-                //coreImage.EndInit();
+                var coreImage = new BitmapImage();
+                coreImage.BeginInit();
+                coreImage.UriSource = new Uri(screen.FileName);
+                coreImage.DecodePixelHeight = 420;
+                coreImage.DecodePixelWidth = 420;
+                coreImage.EndInit();
                 var coreImageWidth = 420;
                 croppedImageWidth = (int)coreImageWidth / 3;
                 croppedImageHeight = (int)(coreImageWidth * coreImage.Height / coreImage.Width) / 3;
@@ -112,15 +120,15 @@ namespace _8PuzzleProject
                             //container.Children.Add(imagePiece.image);
                             imagePiece.originalPos_X = j * (croppedImageWidth + croppedImagePadding);
                             imagePiece.originalPos_Y = i * (croppedImageHeight + croppedImagePadding);
+                            imagePiece.numTag = new DogTag();
+                            imagePiece.numTag.cord_X = i;
+                            imagePiece.numTag.cord_Y = j;
                             list.Add(imagePiece);
-                            //Canvas.SetLeft(imagePiece.image, imagePiece.originalPos_X);
-                            //Canvas.SetTop(imagePiece.image, imagePiece.originalPos_Y);
                         }
                     }
                     puzzlePieceList.Add(list);
                 }
-                //container.Width = coreImage.Width;
-                //container.Height = coreImage.Height;
+
                 var rng = new Random();
                 var pool = new List<int> { 0, 1, 2, 3, 4, 5, 6, 7 };
                 var pooli = new List<int> { 0, 0, 0, 1, 1, 1, 2, 2 };
@@ -141,8 +149,6 @@ namespace _8PuzzleProject
                             container.Children.Add(imagePiece.image);
                             imagePiece.newPos_X = poolj[k] * (croppedImageWidth + croppedImagePadding);
                             imagePiece.newPos_Y = pooli[k] * (croppedImageHeight + croppedImagePadding);
-                            imagePiece.originalPos_X = imagePiece.newPos_X;
-                            imagePiece.originalPos_Y = imagePiece.newPos_Y;
                             scrambledList[pooli[k]].Insert(poolj[k], imagePiece);
                             scrambledList[pooli[k]].RemoveAt(poolj[k] + 1);
 
@@ -275,6 +281,7 @@ namespace _8PuzzleProject
 
         private void StartGame_Clicked(object sender, RoutedEventArgs e)
         {
+            TimerTextBox.IsReadOnly = true;
             StartButton.Content = "Pause";
             isStart = !isStart;
 
@@ -295,19 +302,23 @@ namespace _8PuzzleProject
 
         public int BaseScore { get; set; }
 
-        int OrigTime = 200;
+        int OrigTime;
         private void timeX_Tick(object sender, EventArgs e)
         {
+            var tempOrigTime = OrigTime;
             if (OrigTime > 0)
             {
                 OrigTime--;
-                BaseScore -= 5;
-                TimerTextBlock.Text = OrigTime / 60 + ":" + ((OrigTime % 60) >= 10 ? (OrigTime % 60).ToString() : "0" + OrigTime % 60);
+                var tempVal = BaseScore / tempOrigTime;
+                BaseScore -= tempVal;
+                TimerTextBox.Text = OrigTime / 3600 + ":" + OrigTime / 60 + ":" + ((OrigTime % 60) >= 10 ? (OrigTime % 60).ToString() : "0" + OrigTime % 60);
                 BaseScoreTextBlock.Text = BaseScore.ToString();
             }
             else
             {
                 timerX.Stop();
+                StartButton.Content = "Start";
+                TimerTextBox.IsReadOnly = false;
                 MessageBox.Show("TIME UP!!");
             }
         }
@@ -327,6 +338,127 @@ namespace _8PuzzleProject
                 return true;
             }
             return false;
+        }
+        string imageSource;
+        FileInfo savePathFile = new FileInfo("./SaveGame.txt");
+        BindingList<PuzzlePiece> savedPuzzlePieceList = new BindingList<PuzzlePiece>();
+        string saveLoc = "./saveGame.txt";
+        private void SaveGameButton_Click(object sender, RoutedEventArgs e)
+        {
+            isStart = false;
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Filter = "Text file (*.txt)| *.txt";
+            saveFileDialog.DefaultExt = "*.txt";
+            saveFileDialog.OverwritePrompt = true;
+            //TODO: get preset name/location from user (save to saveLoc)
+
+
+            if (saveFileDialog.ShowDialog() == true)
+            {
+
+                saveLoc = saveFileDialog.FileName;
+                var doc = new XmlDocument();
+
+                var root = doc.CreateElement("Game");
+                root.SetAttribute("IsStart", isStart.ToString());
+                root.SetAttribute("Timer", TimerTextBox.Text.ToString());
+                root.SetAttribute("ImageSource", imageSource);
+
+                var state = doc.CreateElement("State");
+                root.AppendChild(state);
+
+                int null_X = 0;
+                int null_Y = 0;
+                GetNullPosition(ref null_X, ref null_Y);
+
+                for (int i = 0; i < 3; i++)
+                {
+                    for (int j = 0; j < 3; j++)
+                    {
+                        var piece = doc.CreateElement("Piece");
+                        if (i != null_X || j != null_Y)
+                        {
+                            piece.SetAttribute("Tag", $"{scrambledList[i][j].numTag.cord_X},{scrambledList[i][j].numTag.cord_Y}");
+                            piece.SetAttribute("Original_Position", $"{scrambledList[i][j].originalPos_X},{scrambledList[i][j].originalPos_Y}");
+                            piece.SetAttribute("New_Position", $"{scrambledList[i][j].newPos_X},{scrambledList[i][j].newPos_Y}");
+                            state.AppendChild(piece);
+                        }
+                        else
+                        {
+                            piece.SetAttribute("Tag", $"{null_X},{null_Y}");
+                            piece.SetAttribute("Original_Position", $"null");
+                            piece.SetAttribute("New_Position", $"null");
+                            state.AppendChild(piece);
+                        }
+                    }
+
+                }
+
+                doc.AppendChild(root);
+
+                doc.Save(saveFileDialog.FileName);
+                MessageBox.Show("Save successfully");
+            }
+            isStart = true;
+        }
+
+        private void LoadGameButton_Click(object sender, RoutedEventArgs e)
+        {
+            List<List<PuzzlePiece>> tempScrambledList = new List<List<PuzzlePiece>>();
+            var LoadFileDialog = new OpenFileDialog();
+            if (LoadFileDialog.ShowDialog() == true)
+            {
+                var doc = new XmlDocument();
+                doc.Load(LoadFileDialog.FileName);
+                var root = doc.DocumentElement;
+                puzzlePieceList = new List<List<PuzzlePiece>>();
+                container.Children.Clear();
+                imageSource = root.Attributes["ImageSource"].Value;
+                var coreImage = new BitmapImage(new Uri(imageSource));
+
+                var coreImageWidth = 420;
+                croppedImageWidth = (int)coreImageWidth / 3;
+                croppedImageHeight = (int)(coreImageWidth * coreImage.Height / coreImage.Width) / 3;
+
+                for (int i = 0; i < 3; i++)
+                {
+                    var list = new List<PuzzlePiece>();
+                    for (int j = 0; j < 3; j++)
+                    {
+                        if (i != 2 || j != 2)
+                        {
+                            var croppedImage = new CroppedBitmap(coreImage, new Int32Rect(
+                                    (int)(j * coreImage.Width / 3), (int)(i * coreImage.Height / 3),
+                                    (int)coreImage.Width / 3, (int)coreImage.Height / 3));
+                            var imagePiece = new PuzzlePiece() { image = new Image() { Source = croppedImage, Width = croppedImageWidth, Height = croppedImageHeight } };
+                            imagePiece.originalPos_X = j * (croppedImageWidth + croppedImagePadding);
+                            imagePiece.originalPos_Y = i * (croppedImageHeight + croppedImagePadding);
+                            imagePiece.image.Tag = new Tuple<int, int>(i, j);
+                            list.Add(imagePiece);
+                        }
+                    }
+                    puzzlePieceList.Add(list);
+                }
+
+                //for (int i = 0; i < 3; i++)
+                //{
+                //    var line = root.FirstChild.ChildNodes[i].Attributes["Piece"].Value;
+                //    var tokens = line.Split(new String[] { " " }, StringSplitOptions.RemoveEmptyEntries);
+                //    for (int j = 0; i < 3; j++)
+                //    {
+                //        int posX
+                //        if (posX == -1)
+                //        {
+                //            scrambledList[i][j] = null;
+                //        }
+                //        else
+                //        {
+                //            scrambledList[i][j] = puzzlePieceList[posX][posY];
+                //        }
+                //    }
+                //}
+            }
+
         }
     }
 }
