@@ -18,6 +18,7 @@ using System.Timers;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Xml;
+using System.Windows.Controls.Primitives;
 
 namespace _8PuzzleProject
 {
@@ -95,7 +96,7 @@ namespace _8PuzzleProject
             {
                 imageSource = screen.FileName;
                 puzzlePieceList = new List<List<PuzzlePiece>>();
-                container.Children.Clear();
+                clearCanvas();
                 var coreImage = new BitmapImage();
                 coreImage.BeginInit();
                 coreImage.UriSource = new Uri(screen.FileName);
@@ -117,7 +118,7 @@ namespace _8PuzzleProject
                                     (int)(j * coreImage.Width / 3), (int)(i * coreImage.Height / 3),
                                     (int)coreImage.Width / 3, (int)coreImage.Height / 3));
                             var imagePiece = new PuzzlePiece() { image = new Image() { Source = croppedImage, Width = croppedImageWidth, Height = croppedImageHeight } };
-                            //container.Children.Add(imagePiece.image);
+                            container.Children.Add(imagePiece.image);
                             imagePiece.originalPos_X = j * (croppedImageWidth + croppedImagePadding);
                             imagePiece.originalPos_Y = i * (croppedImageHeight + croppedImagePadding);
                             imagePiece.numTag = new DogTag();
@@ -146,7 +147,7 @@ namespace _8PuzzleProject
 
                             var imagePiece = puzzlePieceList[i][j];
                             // Tao giao dien
-                            container.Children.Add(imagePiece.image);
+                            //container.Children.Add(imagePiece.image);
                             imagePiece.newPos_X = poolj[k] * (croppedImageWidth + croppedImagePadding);
                             imagePiece.newPos_Y = pooli[k] * (croppedImageHeight + croppedImagePadding);
                             scrambledList[pooli[k]].Insert(poolj[k], imagePiece);
@@ -404,6 +405,7 @@ namespace _8PuzzleProject
 
         private void LoadGameButton_Click(object sender, RoutedEventArgs e)
         {
+            clearCanvas();
             List<List<PuzzlePiece>> tempScrambledList = new List<List<PuzzlePiece>>();
             var LoadFileDialog = new OpenFileDialog();
             if (LoadFileDialog.ShowDialog() == true)
@@ -412,7 +414,7 @@ namespace _8PuzzleProject
                 doc.Load(LoadFileDialog.FileName);
                 var root = doc.DocumentElement;
                 puzzlePieceList = new List<List<PuzzlePiece>>();
-                container.Children.Clear();
+                
                 imageSource = root.Attributes["ImageSource"].Value;
                 var coreImage = new BitmapImage(new Uri(imageSource));
 
@@ -431,34 +433,107 @@ namespace _8PuzzleProject
                                     (int)(j * coreImage.Width / 3), (int)(i * coreImage.Height / 3),
                                     (int)coreImage.Width / 3, (int)coreImage.Height / 3));
                             var imagePiece = new PuzzlePiece() { image = new Image() { Source = croppedImage, Width = croppedImageWidth, Height = croppedImageHeight } };
+                            
                             imagePiece.originalPos_X = j * (croppedImageWidth + croppedImagePadding);
                             imagePiece.originalPos_Y = i * (croppedImageHeight + croppedImagePadding);
-                            imagePiece.image.Tag = new Tuple<int, int>(i, j);
+                            imagePiece.numTag = new DogTag();
+                            imagePiece.numTag.cord_X = i;
+                            imagePiece.numTag.cord_Y = j;
                             list.Add(imagePiece);
                         }
                     }
                     puzzlePieceList.Add(list);
                 }
+                
+                for (int i = 0; i < 3; i++)
+                {
+                    for (int j = 0; j < 3; j++)
+                    {
+                        var tag = (root.FirstChild.ChildNodes[i].Attributes["Tag"].Value).Split(',');
+                        var originalPos = root.FirstChild.ChildNodes[i].Attributes["Original_Position"].Value.Split(',');
+                        var newPos = root.FirstChild.ChildNodes[i].Attributes["New_Position"].Value.Split(',');
 
-                //for (int i = 0; i < 3; i++)
-                //{
-                //    var line = root.FirstChild.ChildNodes[i].Attributes["Piece"].Value;
-                //    var tokens = line.Split(new String[] { " " }, StringSplitOptions.RemoveEmptyEntries);
-                //    for (int j = 0; i < 3; j++)
-                //    {
-                //        int posX
-                //        if (posX == -1)
-                //        {
-                //            scrambledList[i][j] = null;
-                //        }
-                //        else
-                //        {
-                //            scrambledList[i][j] = puzzlePieceList[posX][posY];
-                //        }
-                //    }
-                //}
+                        int tag_X = int.Parse(tag[0]);
+                        int tag_Y = int.Parse(tag[1]);
+                        if (originalPos[0]=="null")
+                        {
+                            scrambledList[i][j] = null;
+                        }
+                        else
+                        {
+                            scrambledList[i][j] = puzzlePieceList[tag_X][tag_Y];
+                            scrambledList[i][j].originalPos_X = int.Parse(originalPos[0]);
+                            scrambledList[i][j].originalPos_Y = int.Parse(originalPos[1]);
+                            scrambledList[i][j].newPos_X = int.Parse(newPos[0]);
+                            scrambledList[i][j].newPos_Y = int.Parse(newPos[1]);
+                            container.Children.Add(scrambledList[i][j].image);
+                            Canvas.SetLeft(scrambledList[i][j].image, scrambledList[i][j].newPos_X);
+                            Canvas.SetTop(scrambledList[i][j].image, scrambledList[i][j].newPos_Y);
+                        }
+                    }
+                }
+            }
+        }
+        private void clearCanvas()
+        {
+            for (int index = container.Children.Count - 1; index >= 0; index--)
+            {
+                if (container.Children[index] is Image)
+                {
+                    container.Children.RemoveAt(index);
+                }
+
+            }
+        }
+        public class ToolBar : System.Windows.Controls.ToolBar
+        {
+            public override void OnApplyTemplate()
+            {
+                base.OnApplyTemplate();
+
+                var overflowPanel = base.GetTemplateChild("PART_ToolBarOverflowPanel") as ToolBarOverflowPanel;
+                if (overflowPanel != null)
+                {
+                    overflowPanel.Background = OverflowPanelBackground ?? Background;
+                    overflowPanel.Margin = new Thickness(0);
+                }
             }
 
+            public Brush OverflowPanelBackground
+            {
+                get;
+                set;
+            }
         }
+        /// <summary>
+        /// TitleBar_MouseDown - Drag if single-click, resize if double-click
+        /// </summary>
+        private void TitleBar_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Left)
+                if (e.ClickCount == 2)
+                {
+                    //AdjustWindowSize();
+                }
+                else
+                {
+                    Application.Current.MainWindow.DragMove();
+                }
+        }
+
+
+        /// <summary>
+        /// Minimized Button_Clicked
+        /// </summary>
+        private void MinimizeButton_Clicked(object sender, RoutedEventArgs e)
+        {
+            this.WindowState = WindowState.Minimized;
+        }
+
+        private void CloseButton_Clicked(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
+
     }
 }

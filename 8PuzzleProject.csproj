@@ -98,5 +98,9 @@
   <ItemGroup>
     <Folder Include="System\Windows\" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Image\close.png" />
+    <Resource Include="Image\minimize.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
