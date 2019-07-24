@@ -15,6 +15,9 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Timers;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Xml;
 
 namespace _8PuzzleProject
 {
@@ -28,9 +31,11 @@ namespace _8PuzzleProject
             InitializeComponent();
         }
 
+        [Serializable]
         class PuzzlePiece
         {
             public Image image { get; set; }
+            public int numTag { get; set; }
             public int originalPos_X { get; set; }
             public int originalPos_Y { get; set; }
             public int newPos_X { get; set; }
@@ -40,6 +45,9 @@ namespace _8PuzzleProject
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             BaseScore = 1000;
+            //Add Input Time 
+            string time = TimerTextBox.Text;
+            OrigTime = (int) System.TimeSpan.Parse(time).TotalSeconds;
             BaseScoreTextBlock.Text = BaseScore.ToString();
 
             for (int i = 0; i < 3; i++)
@@ -70,11 +78,12 @@ namespace _8PuzzleProject
             {
                 puzzlePieceList = new List<List<PuzzlePiece>>();
                 container.Children.Clear();
-                var coreImage = new BitmapImage(new Uri(screen.FileName));
+                var coreImage = new BitmapImage(new Uri(screen.FileName)); 
+
                 var coreImageWidth = 420;
                 croppedImageWidth = (int)coreImageWidth / 3;
                 croppedImageHeight = (int)(coreImageWidth * coreImage.Height / coreImage.Width) / 3;
-
+                var tag = 0;
                 for (int i = 0; i < 3; i++)
                 {
                     var list = new List<PuzzlePiece>();
@@ -85,11 +94,18 @@ namespace _8PuzzleProject
                             var croppedImage = new CroppedBitmap(coreImage, new Int32Rect(
                                     (int)(j * coreImage.Width / 3), (int)(i * coreImage.Height / 3),
                                     (int)coreImage.Width / 3, (int)coreImage.Height / 3));
+
+                            //var croppedImage = new CroppedBitmap(coreImage, new Int32Rect(
+                            //        (int)(j * coreImage.DecodePixelWidth / 3), (int)(i * coreImage.PixelHeight / 3),
+                            //        (int)coreImage.PixelWidth / 3, (int)coreImage.PixelHeight / 3));
+
                             var imagePiece = new PuzzlePiece() { image = new Image() { Source = croppedImage, Width = croppedImageWidth, Height = croppedImageHeight } };
                             //container.Children.Add(imagePiece.image);
                             imagePiece.originalPos_X = j * (croppedImageWidth + croppedImagePadding);
                             imagePiece.originalPos_Y = i * (croppedImageHeight + croppedImagePadding);
+                            imagePiece.numTag = tag++;
                             list.Add(imagePiece);
+                            
                             //Canvas.SetLeft(imagePiece.image, imagePiece.originalPos_X);
                             //Canvas.SetTop(imagePiece.image, imagePiece.originalPos_Y);
                         }
@@ -227,6 +243,7 @@ namespace _8PuzzleProject
 
         private void StartGame_Clicked(object sender, RoutedEventArgs e)
         {
+            TimerTextBox.IsReadOnly = true;
             StartButton.Content = "Pause";
             isStart = !isStart;
             
@@ -234,7 +251,7 @@ namespace _8PuzzleProject
             {
                 timerX = new System.Windows.Forms.Timer();
 
-                timerX.Interval = 1000;
+                timerX.Interval = 10;
                 timerX.Tick += new EventHandler(timeX_Tick);
                 timerX.Enabled = true;
             }
@@ -246,22 +263,115 @@ namespace _8PuzzleProject
         }
 
         public int BaseScore { get; set; }
-   
-        int OrigTime = 200;
+
+        int OrigTime;
         private void timeX_Tick(object sender, EventArgs e)
         {
+            var tempOrigTime = OrigTime;
             if (OrigTime > 0)
             {
                 OrigTime--;
-                BaseScore -= 5;
-                TimerTextBlock.Text = OrigTime / 60 + ":" + ((OrigTime % 60) >= 10 ? (OrigTime % 60).ToString() : "0" + OrigTime % 60);
+                var tempVal = BaseScore / tempOrigTime;
+                BaseScore -= tempVal;
+                TimerTextBox.Text = OrigTime / 3600 + ":" + OrigTime / 60 + ":" + ((OrigTime % 60) >= 10 ? (OrigTime % 60).ToString() : "0" + OrigTime % 60);
                 BaseScoreTextBlock.Text = BaseScore.ToString();
             }
             else
             {
                 timerX.Stop();
+                StartButton.Content = "Start";
+                TimerTextBox.IsReadOnly = false;
                 MessageBox.Show("TIME UP!!");
             }
+        }
+
+        public static void WriteToBinaryFile<T>(string filePath, T objectToWrite, bool append = false)
+        {
+            using (Stream stream = File.Open(filePath, append ? FileMode.Append : FileMode.Create))
+            {
+                var binaryFormatter = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
+                binaryFormatter.Serialize(stream, objectToWrite);
+            }
+        }
+
+        public static T ReadFromBinaryFile<T>(string filePath)
+        {
+            using (Stream stream = File.Open(filePath, FileMode.Open))
+            {
+                var binaryFormatter = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
+                return (T)binaryFormatter.Deserialize(stream);
+            }
+        }
+
+        private void GetNullPosition(ref int null_X, ref int null_Y)
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                for (int j = 0; j < 3; j++)
+                {
+                    if (scrambledList[i][j] == null)
+                    {
+                        null_X = i;
+                        null_Y = j;
+                    }
+                }
+            }
+            return;
+        }
+
+        FileInfo savePathFile = new FileInfo("./SaveGame.txt");
+        BindingList<PuzzlePiece> savedPuzzlePieceList = new BindingList<PuzzlePiece>();
+        string saveLoc = "./saveGame.txt";
+        private void SaveGameButton_Click(object sender, RoutedEventArgs e)
+        {
+            isStart = false;
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Filter = "Text file (*.txt)| *.txt";
+            saveFileDialog.DefaultExt = "*.txt";
+            saveFileDialog.OverwritePrompt = true;
+            //TODO: get preset name/location from user (save to saveLoc)
+            
+
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                
+                saveLoc = saveFileDialog.FileName;
+                var doc = new XmlDocument();
+
+                var root = doc.CreateElement("Game");
+                root.SetAttribute("IsStart", isStart.ToString());
+                root.SetAttribute("Timer", TimerTextBox.Text.ToString());
+
+                var state = doc.CreateElement("State");
+                root.AppendChild(state);
+
+                int null_X = 0;
+                int null_Y = 0;
+                GetNullPosition(ref null_X, ref null_Y);
+                for (int i = 0; i < 3; i++)
+                {
+                    var line = doc.CreateElement("Line");
+                    line.SetAttribute("Value", $"{(scrambledList[i][0] != null ? scrambledList[i][0].numTag : -1 )} " +
+                        $"{(scrambledList[i][1] != null ? scrambledList[i][1].numTag : -1)} " +
+                        $"{(scrambledList[i][2] != null ? scrambledList[i][2].numTag : -1)}");
+                    state.AppendChild(line);
+                }
+
+                doc.AppendChild(root);
+
+                doc.Save(saveFileDialog.FileName);
+                MessageBox.Show("Save successfully");
+            }
+            isStart = true;
+        }
+
+        private void LoadGameButton_Click(object sender, RoutedEventArgs e)
+        {
+            List<List<PuzzlePiece>> tempScrambledList = new List<List<PuzzlePiece>>();
+            tempScrambledList = ReadFromBinaryFile <List<List<PuzzlePiece>>>(saveLoc);
+
+
+           
         }
     }
 }
