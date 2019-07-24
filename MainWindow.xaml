@@ -11,7 +11,7 @@
             <Label DockPanel.Dock="Top" Content="Timer" FontSize="16"></Label>
             <TextBox Name="TimerTextBox" DockPanel.Dock="Top" Height="40" Text="00:03:20" FontSize="30" HorizontalAlignment="Center" FontWeight="DemiBold"></TextBox>
             <Button Name="StartButton" Width="100" Height="40" DockPanel.Dock="Top" Content="Start" FontSize="16" Margin="0,10,0,0" Click="StartGame_Clicked"></Button>
-            <Button Width="50" Height="40" DockPanel.Dock="Bottom" Content="Hint?"  FontSize="16"></Button>
+            <Button Width="50" Height="40" DockPanel.Dock="Bottom" Content="Hint?" Click="LoadGameButton_Click" FontSize="16"></Button>
             <StackPanel>
                 <TextBlock Text="Your Score:" HorizontalAlignment="Center" Margin="0, 20, 0, 0"></TextBlock>
                 <TextBlock Name="BaseScoreTextBlock" Text="{Binding BaseScore}" HorizontalAlignment="Center" FontSize="20"></TextBlock>
@@ -21,7 +21,7 @@
             <ToolBar Background="AliceBlue" Height="40" Width="500" HorizontalAlignment="Stretch">
                 <Button Name="openButton" Content="Open file..." FontSize="16" Click="OpenButton_Click"/>
                 <Separator/>
-                <Button Content="Save" FontSize="16" Click="SaveGameButton_Click"></Button>
+                <Button Content="Save" FontSize="16" Click="SaveGameButton_Click" Margin="0,0,0,4.2" VerticalAlignment="Bottom"></Button>
             </ToolBar>
         </ToolBarTray>
 
