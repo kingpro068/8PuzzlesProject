@@ -76,7 +76,7 @@ namespace _8PuzzleProject
             scrambledList[2][2] = null;
             leftBorder = canvasLeftPadding;
             rightBorder = container.Width + canvasLeftPadding;
-            topBorder = canvasTopPadding;
+            topBorder = canvasTopPadding + TitleBar.Height;
             bottomBorder = container.Height + canvasTopPadding;
         }
 
@@ -406,7 +406,6 @@ namespace _8PuzzleProject
         private void LoadGameButton_Click(object sender, RoutedEventArgs e)
         {
             clearCanvas();
-            List<List<PuzzlePiece>> tempScrambledList = new List<List<PuzzlePiece>>();
             var LoadFileDialog = new OpenFileDialog();
             if (LoadFileDialog.ShowDialog() == true)
             {
@@ -444,14 +443,14 @@ namespace _8PuzzleProject
                     }
                     puzzlePieceList.Add(list);
                 }
-                
+                int k = 0;
                 for (int i = 0; i < 3; i++)
                 {
                     for (int j = 0; j < 3; j++)
                     {
-                        var tag = (root.FirstChild.ChildNodes[i].Attributes["Tag"].Value).Split(',');
-                        var originalPos = root.FirstChild.ChildNodes[i].Attributes["Original_Position"].Value.Split(',');
-                        var newPos = root.FirstChild.ChildNodes[i].Attributes["New_Position"].Value.Split(',');
+                        var tag = (root.FirstChild.ChildNodes[k].Attributes["Tag"].Value).Split(',');
+                        var originalPos = root.FirstChild.ChildNodes[k].Attributes["Original_Position"].Value.Split(',');
+                        var newPos = root.FirstChild.ChildNodes[k].Attributes["New_Position"].Value.Split(',');
 
                         int tag_X = int.Parse(tag[0]);
                         int tag_Y = int.Parse(tag[1]);
@@ -470,6 +469,7 @@ namespace _8PuzzleProject
                             Canvas.SetLeft(scrambledList[i][j].image, scrambledList[i][j].newPos_X);
                             Canvas.SetTop(scrambledList[i][j].image, scrambledList[i][j].newPos_Y);
                         }
+                        k++;
                     }
                 }
             }

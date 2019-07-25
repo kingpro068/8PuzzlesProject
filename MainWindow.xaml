@@ -45,11 +45,10 @@
                 </ToolBar>
             </ToolBarTray>
 
-            <Border HorizontalAlignment="Left" Margin="50,0,0,0" Height="435" Width="435" BorderBrush="#00E0FF" BorderThickness="1">
-                <Canvas Background="#323133" Name="container" MouseLeftButtonDown="Container_MouseLeftButtonDown"
+
+            <Canvas Background="#323133" x:Name="container" MouseLeftButtonDown="Container_MouseLeftButtonDown" Margin="50,0,0,0" Height="435" Width="435"
             MouseMove="Container_MouseMove" MouseLeftButtonUp="Container_MouseLeftButtonUp">
-                </Canvas>
-            </Border>
+            </Canvas>
         </DockPanel>
     </DockPanel>
 </Window>
