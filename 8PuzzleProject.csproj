@@ -102,5 +102,17 @@
     <Resource Include="Image\close.png" />
     <Resource Include="Image\minimize.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Image\load.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Image\puzzle.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Image\open.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Image\save.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

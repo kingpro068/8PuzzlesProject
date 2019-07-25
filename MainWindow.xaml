@@ -8,13 +8,14 @@
         Title="MainWindow" WindowStyle="None" AllowsTransparency="True" Height="520" Width="700" Loaded="Window_Loaded" WindowStartupLocation="CenterScreen" SizeToContent="WidthAndHeight" ResizeMode="CanMinimize" Background="#29282A">
     <DockPanel x:Name="RootWindow">
         <DockPanel x:Name="TitleBar" Height="35" DockPanel.Dock="Top">
-            <Button x:Name="CloseButton" Background="White" DockPanel.Dock="Right" Click="CloseButton_Clicked" Width="40">
+            <Button x:Name="CloseButton" Background="Transparent" DockPanel.Dock="Right" Click="CloseButton_Clicked" Width="40">
                 <Image Source="./Image/close.png" RenderOptions.BitmapScalingMode="NearestNeighbor" RenderOptions.EdgeMode="Aliased" Height="30" Width="30"></Image>
             </Button>
-            <Button x:Name="MinButton" Background="White" DockPanel.Dock="Right" Click="MinimizeButton_Clicked" Width="40">
+            <Button x:Name="MinButton" Background="Transparent" DockPanel.Dock="Right" Click="MinimizeButton_Clicked" Width="40">
                 <Image Source="./Image/minimize.png" RenderOptions.BitmapScalingMode="NearestNeighbor" RenderOptions.EdgeMode="Aliased" Height="30" Width="30"></Image>
             </Button>
-            <Label FontSize="20" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="#00C3FF" FontWeight="DemiBold">Picture Puzzle</Label>
+            <Image Source="./Image/puzzle.png" Height="30" Width="30"></Image>
+            <Label FontSize="17" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="#00C3FF" FontWeight="DemiBold">Picture Puzzle</Label>
         </DockPanel>
 
         <DockPanel LastChildFill="True">
@@ -26,10 +27,11 @@
                         <DropShadowEffect ShadowDepth="0" BlurRadius="10"/>
                     </Border.Effect>
                     <DockPanel  Width="150" Background="#323133">
-                        <Label DockPanel.Dock="Top" Content="Timer" FontWeight="DemiBold" FontSize="20" Foreground="#00C3FF" Background="#323133"></Label>
+                        <Label DockPanel.Dock="Top" Content="Timer" HorizontalAlignment="Center" FontWeight="DemiBold" FontSize="20" Foreground="#00C3FF" Background="#323133"></Label>
                         <TextBox Name="TimerTextBox" BorderBrush="Transparent" DockPanel.Dock="Top" Height="40" Text="00:03:20" FontSize="30" HorizontalAlignment="Center" FontWeight="DemiBold" Foreground="#00C3FF" Background="#323133"></TextBox>
-                        <Button Name="StartButton" BorderBrush="#00C3FF" Width="100" Height="40" DockPanel.Dock="Top" Content="Start" FontSize="18" FontWeight="DemiBold" Margin="0,10,0,0" Click="StartGame_Clicked" Foreground="#00C3FF" Background="#323133"></Button>
-                        <Button Width="50" BorderBrush="#00C3FF" Height="40" DockPanel.Dock="Bottom" Content="Hint?" Click="LoadGameButton_Click" FontSize="20" FontWeight="DemiBold" Foreground="#00C3FF" Background="#323133"></Button>
+                        <Button Name="StartButton" BorderBrush="#00C3FF" Width="100" Height="40" DockPanel.Dock="Top" Content="Start" FontSize="18" FontWeight="DemiBold" Margin="0,10,0,0" Click="StartGame_Clicked" Foreground="#00C3FF" Background="#323133" IsEnabled="False"></Button>
+                        <Button Name="HintButton" Width="60" BorderBrush="#00C3FF" Height="40" DockPanel.Dock="Bottom" Content="Hint?" Click="HintButton_Clicked" FontSize="20" FontWeight="DemiBold" Foreground="#00C3FF" Background="#323133" IsEnabled="False"></Button>
+                        <Image Name="HintImage" DockPanel.Dock="Bottom" Margin="5, 5, 5, 10" Visibility="Collapsed"></Image>
                         <StackPanel>
                             <TextBlock Text="Your Score:" HorizontalAlignment="Center" Margin="0, 20, 0, 0" Foreground="#00C3FF" FontSize="18"></TextBlock>
                             <TextBlock Name="BaseScoreTextBlock" Text="{Binding BaseScore}" HorizontalAlignment="Center" FontSize="20" Foreground="#00C3FF"></TextBlock>
@@ -38,10 +40,27 @@
                 </Border>
             </Border>
             <ToolBarTray Background="#323133" DockPanel.Dock="Top" HorizontalAlignment="Stretch">
-                <ToolBar Background="#323133" Height="40" Width="500" HorizontalAlignment="Stretch">
-                    <Button Name="openButton" Content="Open file..." FontSize="16" Click="OpenButton_Click" Foreground="#00C3FF"/>
+                <ToolBar Background="#323133" Height="35" Width="500" HorizontalAlignment="Stretch">
+                    <Button Name="openButton" Click="OpenButton_Click" Foreground="#00C3FF" Background="Transparent">
+                        <StackPanel Orientation="Horizontal">
+                            <Image Source="./Image/open.png" RenderOptions.BitmapScalingMode="HighQuality" Width="20" Height="20"/>
+                            <TextBlock Text="Open file..." FontSize="14" Margin="4,0,0,0"></TextBlock>
+                        </StackPanel>
+                    </Button>
                     <Separator Foreground="#00C3FF"/>
-                    <Button Content="Save" FontSize="16" Click="SaveGameButton_Click" Margin="0,0,0,4.2" VerticalAlignment="Bottom" Foreground="#00C3FF"></Button>
+                    <Button Name="SaveButton" Click="SaveGameButton_Click" Foreground="#00C3FF" Background="Transparent" IsEnabled="False">
+                        <StackPanel Orientation="Horizontal">
+                            <Image Source="./Image/save.png" RenderOptions.BitmapScalingMode="HighQuality" Width="20" Height="20"/>
+                            <TextBlock Text="Save" FontSize="14" Margin="4,0,0,0"></TextBlock>
+                        </StackPanel>
+                    </Button>
+                    <Separator Foreground="#00C3FF"/>
+                    <Button Click="LoadGameButton_Click" Foreground="#00C3FF" Background="Transparent">
+                        <StackPanel Orientation="Horizontal">
+                            <Image Source="./Image/load.png" RenderOptions.BitmapScalingMode="HighQuality" Width="20" Height="20"/>
+                            <TextBlock Text="Load" FontSize="14" Margin="4,0,0,0"></TextBlock>
+                        </StackPanel>
+                    </Button>
                 </ToolBar>
             </ToolBarTray>
 
