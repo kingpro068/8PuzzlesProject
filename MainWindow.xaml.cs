@@ -496,7 +496,15 @@ namespace _8PuzzleProject
                 BaseScore = int.Parse(root.Attributes["Score"].Value);
 
                 imageSource = root.Attributes["ImageSource"].Value;
-                var coreImage = new BitmapImage(new Uri(imageSource));
+
+                var coreImage = new BitmapImage();
+                coreImage.BeginInit();
+                coreImage.UriSource = new Uri(imageSource);
+                coreImage.DecodePixelHeight = 420;
+                coreImage.DecodePixelWidth = 420;
+                coreImage.EndInit();
+
+                HintImage.Source = coreImage;
 
                 var coreImageWidth = 420;
                 croppedImageWidth = (int)coreImageWidth / 3;
