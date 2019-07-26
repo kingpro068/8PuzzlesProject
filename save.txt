@@ -1,13 +1,13 @@
-<Game IsStart="False" Timer="0:3:08" Score="940" ImageSource="C:\Users\Admin\Pictures\Background\IMG_0222.JPG">
+<Game IsStart="False" Timer="0:1:06" Score="330" ImageSource="C:\Users\Admin\Pictures\Background\IMG_0222.JPG">
   <State>
-    <Piece Tag="2,1" Original_Position="145,0" New_Position="0,0" />
-    <Piece Tag="2,0" Original_Position="145,145" New_Position="145,0" />
-    <Piece Tag="1,0" Original_Position="0,145" New_Position="290,0" />
-    <Piece Tag="1,1" Original_Position="0,0" New_Position="0,145" />
+    <Piece Tag="0,0" Original_Position="0,145" New_Position="0,0" />
+    <Piece Tag="0,1" Original_Position="290,0" New_Position="145,0" />
+    <Piece Tag="0,2" Original_Position="290,145" New_Position="290,0" />
+    <Piece Tag="1,0" Original_Position="145,145" New_Position="0,145" />
     <Piece Tag="1,1" Original_Position="null" New_Position="null" />
-    <Piece Tag="0,2" Original_Position="145,145" New_Position="290,145" />
-    <Piece Tag="1,2" Original_Position="0,145" New_Position="0,290" />
-    <Piece Tag="0,1" Original_Position="0,290" New_Position="145,290" />
-    <Piece Tag="0,0" Original_Position="290,145" New_Position="290,290" />
+    <Piece Tag="1,1" Original_Position="145,145" New_Position="290,145" />
+    <Piece Tag="2,0" Original_Position="145,290" New_Position="0,290" />
+    <Piece Tag="2,1" Original_Position="290,290" New_Position="145,290" />
+    <Piece Tag="1,2" Original_Position="290,145" New_Position="290,290" />
   </State>
 </Game>

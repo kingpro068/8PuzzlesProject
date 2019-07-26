@@ -33,7 +33,6 @@ namespace _8PuzzleProject
             public int cord_Y { get; set; }
         }
 
-
         int canvasLeftPadding = 52;
         int canvasTopPadding = 42;
         bool isDragging = false;
@@ -188,6 +187,8 @@ namespace _8PuzzleProject
                     }
                 } while (!isSolvablePuzzle(initList));
 
+                isStart = false;
+
                 //ENABLE BUTTON
                 StartButton.IsEnabled = true;
                 HintButton.IsEnabled = true;
@@ -197,11 +198,16 @@ namespace _8PuzzleProject
 
         //CHECK SOLVABLE
         List<List<int>> initList = new List<List<int>>() { new List<int> { 0, 0, 0 },
-                                                               new List<int> { 0, 0, 0 },
-                                                               new List<int> { 0, 0, 0 } };
+                                                           new List<int> { 0, 0, 0 },
+                                                           new List<int> { 0, 0, 0 } };
+        List<List<int>> currentList = new List<List<int>>() { new List<int> { 0, 0, 0 },
+                                                              new List<int> { 0, 0, 0 },
+                                                              new List<int> { 0, 0, 0 } };
         List<List<int>> goalList = new List<List<int>>() { new List<int> { 1, 2, 3 },
-                                                                   new List<int> { 4, 5, 6 },
-                                                                   new List<int> { 7, 8, 0 } };
+                                                           new List<int> { 4, 5, 6 },
+                                                           new List<int> { 7, 8, 0 } };
+        //WINNING CHECKED VARIABLE
+        bool isWin = false;
 
         int countSmallerTitles(List<List<int>> list)
         {
@@ -234,9 +240,31 @@ namespace _8PuzzleProject
             return countingInit % 2 == 0;
         }
 
+        void checkWinningState(List<List<int>> initList)
+        {
+            int count = 0;
+            for (int i = 0; i < 3; i++)
+            {
+                for (int j = 0; j < 3; j++)
+                {
+                    if (currentList[i][j] == goalList[i][j])
+                        count++;
+                }
+            }
+
+            if (count == 9)
+            {
+                isWin = true;
+            }
+            else
+            {
+                isWin = false;
+            }
+        }
+
         private void Container_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            if (!isStart)
+            if (!isStart || isWin)
             {
                 return;
             }
@@ -295,7 +323,7 @@ namespace _8PuzzleProject
 
         private void Container_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            if (!isStart)
+            if (!isStart || isWin)
                 return;
 
             isDragging = false;
@@ -326,6 +354,39 @@ namespace _8PuzzleProject
                 }
             }
 
+            //Get current state to check win
+            int null_X = 0;
+            int null_Y = 0;
+            GetNullPosition(ref null_X, ref null_Y);
+            for (int i = 0; i < 3; i++)
+            {
+                for (int j = 0; j < 3; j++)
+                {
+                    if (i != null_X || j != null_Y)
+                    {
+                        var temp = scrambledList[i][j].numTag.cord_X * 3 + scrambledList[i][j].numTag.cord_Y + 1;
+                        currentList[i][j] = temp;
+                    }
+                    else
+                    {
+                        currentList[i][j] = 0;
+                    }
+                }
+            }
+
+            //CHECK WIN
+            checkWinningState(currentList);
+            if (isWin)
+            {
+                MessageBox.Show("YOU WIN!!");
+                isWin = false;
+                timerX.Stop();
+                StartButton.Content = "Start";
+                isStart = false;
+                StartButton.IsEnabled = false;
+                SaveButton.IsEnabled = false;
+                HintButton.IsEnabled = false;
+            }
         }
 
         private void GetNullPosition(ref int null_X, ref int null_Y)
@@ -351,6 +412,8 @@ namespace _8PuzzleProject
 
         private void StartGame_Clicked(object sender, RoutedEventArgs e)
         {
+            openButton.IsEnabled = false;
+
             TimerTextBox.IsReadOnly = true;
             StartButton.Content = "Pause";
             isStart = !isStart;
@@ -636,6 +699,39 @@ namespace _8PuzzleProject
             {
                 HintImage.Visibility = Visibility.Collapsed;
             }
+        }
+
+        private void NewGame_Clicked(object sender, RoutedEventArgs e)
+        {
+            openButton.IsEnabled = true;
+            HintButton.IsEnabled = false;
+            BaseScore = 1000;
+            BaseScoreTextBlock.Text = BaseScore.ToString();
+            SaveButton.IsEnabled = false;
+            OrigTime = 200;
+            TimerTextBox.Text = "00:03:20";
+            timerX.Stop();
+            StartButton.IsEnabled = false;
+            StartButton.Content = "Start";
+            puzzlePieceList.Clear();
+            scrambledList.Clear();
+            for (int i = 0; i < 3; i++)
+            {
+                var list = new List<PuzzlePiece>();
+                for (int j = 0; j < 3; j++)
+                {
+                    var image = new PuzzlePiece();
+                    list.Add(image);
+                }
+                scrambledList.Add(list);
+            }
+            scrambledList[2][2] = null;
+            leftBorder = canvasLeftPadding;
+            rightBorder = container.Width + canvasLeftPadding;
+            topBorder = canvasTopPadding + TitleBar.Height;
+            bottomBorder = container.Height + canvasTopPadding;
+            clearCanvas();
+            isWin = false;
         }
     }
 }

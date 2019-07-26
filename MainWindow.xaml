@@ -30,6 +30,7 @@
                         <Label DockPanel.Dock="Top" Content="Timer" HorizontalAlignment="Center" FontWeight="DemiBold" FontSize="20" Foreground="#00C3FF" Background="#323133"></Label>
                         <TextBox Name="TimerTextBox" BorderBrush="Transparent" DockPanel.Dock="Top" Height="40" Text="00:03:20" FontSize="30" HorizontalAlignment="Center" FontWeight="DemiBold" Foreground="#00C3FF" Background="#323133"></TextBox>
                         <Button Name="StartButton" BorderBrush="#00C3FF" Width="100" Height="40" DockPanel.Dock="Top" Content="Start" FontSize="18" FontWeight="DemiBold" Margin="0,10,0,0" Click="StartGame_Clicked" Foreground="#00C3FF" Background="#323133" IsEnabled="False"></Button>
+                        <Button Name="NewGame" BorderBrush="#00C3FF" Width="100" Height="40" DockPanel.Dock="Top" Content="New Game" FontSize="18" FontWeight="DemiBold" Margin="0,10,0,0" Click="NewGame_Clicked" Foreground="#00C3FF" Background="#323133"></Button>
                         <Button Name="HintButton" Width="60" BorderBrush="#00C3FF" Height="40" DockPanel.Dock="Bottom" Content="Hint?" Click="HintButton_Clicked" FontSize="20" FontWeight="DemiBold" Foreground="#00C3FF" Background="#323133" IsEnabled="False"></Button>
                         <Image Name="HintImage" DockPanel.Dock="Bottom" Margin="5, 5, 5, 10" Visibility="Collapsed"></Image>
                         <StackPanel>
