@@ -61,6 +61,7 @@ namespace _8PuzzleProject
             string time = TimerTextBox.Text;
             OrigTime = (int)System.TimeSpan.Parse(time).TotalSeconds;
             BaseScoreTextBlock.Text = BaseScore.ToString();
+            TimerTextBox.IsReadOnly = true;
 
             for (int i = 0; i < 3; i++)
             {
@@ -77,8 +78,81 @@ namespace _8PuzzleProject
             rightBorder = container.Width + canvasLeftPadding;
             topBorder = canvasTopPadding + TitleBar.Height;
             bottomBorder = container.Height + canvasTopPadding;
+
+            //Key Arrows 
+            this.KeyDown += new KeyEventHandler(KeyDownHandler);
         }
 
+        private void KeyDownHandler(object sender, KeyEventArgs e)
+        {
+            if (isStart && isEnded == false)
+            {
+                int null_X = 0;
+                int null_Y = 0;
+                GetNullPosition(ref null_X, ref null_Y);
+
+                switch (e.Key)
+                {
+                    case Key.Up:
+                        if (null_X == 2)
+                            return;
+
+                        selectedPiece = scrambledList[null_X + 1][null_Y];
+                        scrambledList[null_X][null_Y] = selectedPiece;
+                        scrambledList[null_X + 1][null_Y] = null;
+                        selectedPiece.newPos_X = null_Y * (croppedImageWidth + croppedImagePadding);
+                        selectedPiece.newPos_Y = null_X * (croppedImageHeight + croppedImagePadding);
+                        Canvas.SetLeft(selectedPiece.image, selectedPiece.newPos_X);
+                        Canvas.SetTop(selectedPiece.image, selectedPiece.newPos_Y);
+                        checkWinningState();
+                        break;
+
+                    case Key.Down:
+                        if (null_X == 0)
+                            return;
+
+                        selectedPiece = scrambledList[null_X - 1][null_Y];
+                        scrambledList[null_X][null_Y] = selectedPiece;
+                        scrambledList[null_X - 1][null_Y] = null;
+                        selectedPiece.newPos_X = null_Y * (croppedImageWidth + croppedImagePadding);
+                        selectedPiece.newPos_Y = null_X * (croppedImageHeight + croppedImagePadding);
+                        Canvas.SetLeft(selectedPiece.image, selectedPiece.newPos_X);
+                        Canvas.SetTop(selectedPiece.image, selectedPiece.newPos_Y);
+                        checkWinningState();
+                        break;
+
+                    case Key.Left:
+                        if (null_Y == 2)
+                            return;
+
+                        selectedPiece = scrambledList[null_X][null_Y + 1];
+                        scrambledList[null_X][null_Y] = selectedPiece;
+                        scrambledList[null_X][null_Y + 1] = null;
+                        selectedPiece.newPos_X = null_Y * (croppedImageWidth + croppedImagePadding);
+                        selectedPiece.newPos_Y = null_X * (croppedImageHeight + croppedImagePadding);
+                        Canvas.SetLeft(selectedPiece.image, selectedPiece.newPos_X);
+                        Canvas.SetTop(selectedPiece.image, selectedPiece.newPos_Y);
+                        checkWinningState();
+                        break;
+
+                    case Key.Right:
+                        if (null_Y == 0)
+                            return;
+
+                        selectedPiece = scrambledList[null_X][null_Y - 1];
+                        scrambledList[null_X][null_Y] = selectedPiece;
+                        scrambledList[null_X][null_Y - 1] = null;
+                        selectedPiece.newPos_X = null_Y * (croppedImageWidth + croppedImagePadding);
+                        selectedPiece.newPos_Y = null_X * (croppedImageHeight + croppedImagePadding);
+                        Canvas.SetLeft(selectedPiece.image, selectedPiece.newPos_X);
+                        Canvas.SetTop(selectedPiece.image, selectedPiece.newPos_Y);
+                        checkWinningState();
+                        break;
+
+                    default: return;
+                }
+            } 
+        }
 
         List<List<PuzzlePiece>> puzzlePieceList = new List<List<PuzzlePiece>>();
         List<List<PuzzlePiece>> scrambledList = new List<List<PuzzlePiece>>();
@@ -90,7 +164,8 @@ namespace _8PuzzleProject
         private void OpenButton_Click(object sender, RoutedEventArgs e)
         {
             var screen = new OpenFileDialog();
-
+            screen.Filter = "Image files (*.jpg, *.jpeg, *.jpe, *.jfif, *.png) | *.jpg; *.jpeg; *.jpe; *.jfif; *.png";
+            screen.DefaultExt = "*.png";
             if (screen.ShowDialog() == true)
             {
                 imageSource = screen.FileName;
@@ -207,7 +282,7 @@ namespace _8PuzzleProject
                                                            new List<int> { 4, 5, 6 },
                                                            new List<int> { 7, 8, 0 } };
         //WINNING CHECKED VARIABLE
-        bool isWin = false;
+        bool isEnded = false;
 
         int countSmallerTitles(List<List<int>> list)
         {
@@ -240,8 +315,29 @@ namespace _8PuzzleProject
             return countingInit % 2 == 0;
         }
 
-        void checkWinningState(List<List<int>> initList)
+        void checkWinningState()
         {
+            //Get current state to check win
+            int null_X = 0;
+            int null_Y = 0;
+            GetNullPosition(ref null_X, ref null_Y);
+            for (int i = 0; i < 3; i++)
+            {
+                for (int j = 0; j < 3; j++)
+                {
+                    if (i != null_X || j != null_Y)
+                    {
+                        var temp = scrambledList[i][j].numTag.cord_X * 3 + scrambledList[i][j].numTag.cord_Y + 1;
+                        currentList[i][j] = temp;
+                    }
+                    else
+                    {
+                        currentList[i][j] = 0;
+                    }
+                }
+            }
+
+            //CHECK WIN
             int count = 0;
             for (int i = 0; i < 3; i++)
             {
@@ -254,17 +350,29 @@ namespace _8PuzzleProject
 
             if (count == 9)
             {
-                isWin = true;
+                isEnded = true;
             }
             else
             {
-                isWin = false;
+                isEnded = false;
+            }
+
+            if (isEnded)
+            {
+                MessageBox.Show("YOU WIN!!");
+                isEnded = false;
+                timerX.Stop();
+                StartButton.Content = "Start";
+                isStart = false;
+                StartButton.IsEnabled = false;
+                SaveButton.IsEnabled = false;
+                HintButton.IsEnabled = false;
             }
         }
 
         private void Container_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            if (!isStart || isWin)
+            if (!isStart || isEnded)
             {
                 return;
             }
@@ -323,7 +431,7 @@ namespace _8PuzzleProject
 
         private void Container_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            if (!isStart || isWin)
+            if (!isStart || isEnded)
                 return;
 
             isDragging = false;
@@ -353,40 +461,7 @@ namespace _8PuzzleProject
                     return;
                 }
             }
-
-            //Get current state to check win
-            int null_X = 0;
-            int null_Y = 0;
-            GetNullPosition(ref null_X, ref null_Y);
-            for (int i = 0; i < 3; i++)
-            {
-                for (int j = 0; j < 3; j++)
-                {
-                    if (i != null_X || j != null_Y)
-                    {
-                        var temp = scrambledList[i][j].numTag.cord_X * 3 + scrambledList[i][j].numTag.cord_Y + 1;
-                        currentList[i][j] = temp;
-                    }
-                    else
-                    {
-                        currentList[i][j] = 0;
-                    }
-                }
-            }
-
-            //CHECK WIN
-            checkWinningState(currentList);
-            if (isWin)
-            {
-                MessageBox.Show("YOU WIN!!");
-                isWin = false;
-                timerX.Stop();
-                StartButton.Content = "Start";
-                isStart = false;
-                StartButton.IsEnabled = false;
-                SaveButton.IsEnabled = false;
-                HintButton.IsEnabled = false;
-            }
+            checkWinningState();
         }
 
         private void GetNullPosition(ref int null_X, ref int null_Y)
@@ -453,6 +528,10 @@ namespace _8PuzzleProject
                 StartButton.Content = "Start";
                 TimerTextBox.IsReadOnly = false;
                 MessageBox.Show("TIME UP!!");
+                MessageBox.Show("Please press New Game to play again");
+                isEnded = true;
+                StartButton.IsEnabled = false;
+                SaveButton.IsEnabled = false;
             }
         }
 
@@ -539,13 +618,11 @@ namespace _8PuzzleProject
 
         private void LoadGameButton_Click(object sender, RoutedEventArgs e)
         {
-            //ENABLE BUTTON
-            StartButton.IsEnabled = true;
-            HintButton.IsEnabled = true;
-            SaveButton.IsEnabled = true;
-
             clearCanvas();
             var LoadFileDialog = new OpenFileDialog();
+            LoadFileDialog.Filter = "Text file (*.txt)| *.txt";
+            LoadFileDialog.DefaultExt = "*.txt";
+
             if (LoadFileDialog.ShowDialog() == true)
             {
                 var doc = new XmlDocument();
@@ -623,6 +700,14 @@ namespace _8PuzzleProject
                         }
                         k++;
                     }
+                }
+
+                //ENABLE BUTTON
+                if (puzzlePieceList.Count != 0)
+                {
+                    StartButton.IsEnabled = true;
+                    HintButton.IsEnabled = true;
+                    SaveButton.IsEnabled = true;
                 }
             }
         }
@@ -703,14 +788,22 @@ namespace _8PuzzleProject
 
         private void NewGame_Clicked(object sender, RoutedEventArgs e)
         {
+            if (puzzlePieceList.Count == 0)
+                return;
+
             openButton.IsEnabled = true;
             HintButton.IsEnabled = false;
+            HintImage.Source = null;
             BaseScore = 1000;
             BaseScoreTextBlock.Text = BaseScore.ToString();
             SaveButton.IsEnabled = false;
+            isStart = false;
             OrigTime = 200;
             TimerTextBox.Text = "00:03:20";
-            timerX.Stop();
+            if (timerX != null)
+            {
+                timerX.Stop();
+            }      
             StartButton.IsEnabled = false;
             StartButton.Content = "Start";
             puzzlePieceList.Clear();
@@ -731,7 +824,7 @@ namespace _8PuzzleProject
             topBorder = canvasTopPadding + TitleBar.Height;
             bottomBorder = container.Height + canvasTopPadding;
             clearCanvas();
-            isWin = false;
+            isEnded = false;
         }
     }
 }
