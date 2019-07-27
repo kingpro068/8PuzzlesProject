@@ -163,112 +163,120 @@ namespace _8PuzzleProject
 
         private void OpenButton_Click(object sender, RoutedEventArgs e)
         {
-            var screen = new OpenFileDialog();
-            screen.Filter = "Image files (*.jpg, *.jpeg, *.jpe, *.jfif, *.png) | *.jpg; *.jpeg; *.jpe; *.jfif; *.png";
-            screen.DefaultExt = "*.png";
-            if (screen.ShowDialog() == true)
+            try
             {
-                imageSource = screen.FileName;
-                puzzlePieceList = new List<List<PuzzlePiece>>();
-                clearCanvas();
-
-                var coreImage = new BitmapImage();
-                //Resize Image
-                coreImage.BeginInit();
-                coreImage.UriSource = new Uri(screen.FileName);
-                coreImage.DecodePixelHeight = 420;
-                coreImage.DecodePixelWidth = 420;
-                coreImage.EndInit();
-
-                HintImage.Source = coreImage;
-
-                var coreImageWidth = 420;
-                croppedImageWidth = (int)coreImageWidth / 3;
-                croppedImageHeight = (int)(coreImageWidth * coreImage.Height / coreImage.Width) / 3;
-
-                for (int i = 0; i < 3; i++)
+                var screen = new OpenFileDialog();
+                screen.Filter = "Image files (*.jpg, *.jpeg, *.jpe, *.jfif, *.png) | *.jpg; *.jpeg; *.jpe; *.jfif; *.png";
+                screen.DefaultExt = "*.png";
+                if (screen.ShowDialog() == true)
                 {
-                    var list = new List<PuzzlePiece>();
-                    for (int j = 0; j < 3; j++)
+                    imageSource = screen.FileName;
+                    puzzlePieceList = new List<List<PuzzlePiece>>();
+                    clearCanvas();
+
+                    var coreImage = new BitmapImage();
+                    //Resize Image
+                    coreImage.BeginInit();
+                    coreImage.UriSource = new Uri(screen.FileName);
+                    coreImage.DecodePixelHeight = 420;
+                    coreImage.DecodePixelWidth = 420;
+                    coreImage.EndInit();
+
+                    HintImage.Source = coreImage;
+
+                    var coreImageWidth = 420;
+                    croppedImageWidth = (int)coreImageWidth / 3;
+                    croppedImageHeight = (int)(coreImageWidth * coreImage.Height / coreImage.Width) / 3;
+
+                    for (int i = 0; i < 3; i++)
                     {
-                        if (i != 2 || j != 2)
+                        var list = new List<PuzzlePiece>();
+                        for (int j = 0; j < 3; j++)
                         {
-                            var croppedImage = new CroppedBitmap(coreImage, new Int32Rect(
-                                    (int)(j * coreImage.Width / 3), (int)(i * coreImage.Height / 3),
-                                    (int)coreImage.Width / 3, (int)coreImage.Height / 3));
-                            var imagePiece = new PuzzlePiece() { image = new Image() { Source = croppedImage, Width = croppedImageWidth, Height = croppedImageHeight } };
-                            container.Children.Add(imagePiece.image);
-                            imagePiece.originalPos_X = j * (croppedImageWidth + croppedImagePadding);
-                            imagePiece.originalPos_Y = i * (croppedImageHeight + croppedImagePadding);
-                            imagePiece.numTag = new DogTag();
-                            imagePiece.numTag.cord_X = i;
-                            imagePiece.numTag.cord_Y = j;
-                            list.Add(imagePiece);
+                            if (i != 2 || j != 2)
+                            {
+                                var croppedImage = new CroppedBitmap(coreImage, new Int32Rect(
+                                        (int)(j * coreImage.Width / 3), (int)(i * coreImage.Height / 3),
+                                        (int)coreImage.Width / 3, (int)coreImage.Height / 3));
+                                var imagePiece = new PuzzlePiece() { image = new Image() { Source = croppedImage, Width = croppedImageWidth, Height = croppedImageHeight } };
+                                container.Children.Add(imagePiece.image);
+                                imagePiece.originalPos_X = j * (croppedImageWidth + croppedImagePadding);
+                                imagePiece.originalPos_Y = i * (croppedImageHeight + croppedImagePadding);
+                                imagePiece.numTag = new DogTag();
+                                imagePiece.numTag.cord_X = i;
+                                imagePiece.numTag.cord_Y = j;
+                                list.Add(imagePiece);
+                            }
                         }
+                        puzzlePieceList.Add(list);
                     }
-                    puzzlePieceList.Add(list);
+
+                    do
+                    {
+                        var rng = new Random();
+                        var pool = new List<int> { 0, 1, 2, 3, 4, 5, 6, 7 };
+                        var pooli = new List<int> { 0, 0, 0, 1, 1, 1, 2, 2 };
+                        var poolj = new List<int> { 0, 1, 2, 0, 1, 2, 0, 1 };
+
+                        for (int i = 0; i < 3; i++)
+                        {
+                            //var list = new List<PuzzlePiece>();
+                            for (int j = 0; j < 3; j++)
+                            {
+                                if (i != 2 || j != 2)
+                                {
+                                    // Set vi tri
+                                    var k = rng.Next(pool.Count); // Chon ngau nhien mot chi muc trong pool
+
+                                    var imagePiece = puzzlePieceList[i][j];
+                                    // Tao giao dien
+                                    //container.Children.Add(imagePiece.image);
+                                    imagePiece.newPos_X = poolj[k] * (croppedImageWidth + croppedImagePadding);
+                                    imagePiece.newPos_Y = pooli[k] * (croppedImageHeight + croppedImagePadding);
+                                    scrambledList[pooli[k]].Insert(poolj[k], imagePiece);
+                                    scrambledList[pooli[k]].RemoveAt(poolj[k] + 1);
+
+                                    //list.Add(imagePiece);
+                                    Canvas.SetLeft(imagePiece.image, imagePiece.newPos_X);
+                                    Canvas.SetTop(imagePiece.image, imagePiece.newPos_Y);
+                                    pool.RemoveAt(k);
+                                    pooli.RemoveAt(k);
+                                    poolj.RemoveAt(k);
+                                }
+                            }
+                        }
+
+                        //For solvable check
+                        for (int i = 0; i < 3; i++)
+                        {
+                            for (int j = 0; j < 3; j++)
+                            {
+                                if (i != 2 || j != 2)
+                                {
+                                    var temp = scrambledList[i][j].numTag.cord_X * 3 + scrambledList[i][j].numTag.cord_Y + 1;
+                                    initList[i][j] = temp;
+                                }
+                                else
+                                {
+                                    initList[i][j] = 0;
+                                }
+                            }
+                        }
+                    } while (!isSolvablePuzzle(initList));
+
+                    isStart = false;
+
+                    //ENABLE BUTTON
+                    StartButton.IsEnabled = true;
+                    HintButton.IsEnabled = true;
+                    SaveButton.IsEnabled = true;
                 }
-
-                do
-                {
-                    var rng = new Random();
-                    var pool = new List<int> { 0, 1, 2, 3, 4, 5, 6, 7 };
-                    var pooli = new List<int> { 0, 0, 0, 1, 1, 1, 2, 2 };
-                    var poolj = new List<int> { 0, 1, 2, 0, 1, 2, 0, 1 };
-
-                    for (int i = 0; i < 3; i++)
-                    {
-                        //var list = new List<PuzzlePiece>();
-                        for (int j = 0; j < 3; j++)
-                        {
-                            if (i != 2 || j != 2)
-                            {
-                                // Set vi tri
-                                var k = rng.Next(pool.Count); // Chon ngau nhien mot chi muc trong pool
-
-                                var imagePiece = puzzlePieceList[i][j];
-                                // Tao giao dien
-                                //container.Children.Add(imagePiece.image);
-                                imagePiece.newPos_X = poolj[k] * (croppedImageWidth + croppedImagePadding);
-                                imagePiece.newPos_Y = pooli[k] * (croppedImageHeight + croppedImagePadding);
-                                scrambledList[pooli[k]].Insert(poolj[k], imagePiece);
-                                scrambledList[pooli[k]].RemoveAt(poolj[k] + 1);
-
-                                //list.Add(imagePiece);
-                                Canvas.SetLeft(imagePiece.image, imagePiece.newPos_X);
-                                Canvas.SetTop(imagePiece.image, imagePiece.newPos_Y);
-                                pool.RemoveAt(k);
-                                pooli.RemoveAt(k);
-                                poolj.RemoveAt(k);
-                            }
-                        }
-                    }
-
-                    //For solvable check
-                    for (int i = 0; i < 3; i++)
-                    {
-                        for (int j = 0; j < 3; j++)
-                        {
-                            if (i != 2 || j != 2)
-                            {
-                                var temp = scrambledList[i][j].numTag.cord_X * 3 + scrambledList[i][j].numTag.cord_Y + 1;
-                                initList[i][j] = temp;
-                            }
-                            else
-                            {
-                                initList[i][j] = 0;
-                            }
-                        }
-                    }
-                } while (!isSolvablePuzzle(initList));
-
-                isStart = false;
-
-                //ENABLE BUTTON
-                StartButton.IsEnabled = true;
-                HintButton.IsEnabled = true;
-                SaveButton.IsEnabled = true;
             }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+            
         }
 
         //CHECK SOLVABLE
@@ -618,98 +626,106 @@ namespace _8PuzzleProject
 
         private void LoadGameButton_Click(object sender, RoutedEventArgs e)
         {
-            clearCanvas();
-            var LoadFileDialog = new OpenFileDialog();
-            LoadFileDialog.Filter = "Text file (*.txt)| *.txt";
-            LoadFileDialog.DefaultExt = "*.txt";
-
-            if (LoadFileDialog.ShowDialog() == true)
+            try
             {
-                var doc = new XmlDocument();
-                doc.Load(LoadFileDialog.FileName);
-                var root = doc.DocumentElement;
-                puzzlePieceList = new List<List<PuzzlePiece>>();
+                clearCanvas();
+                var LoadFileDialog = new OpenFileDialog();
+                LoadFileDialog.Filter = "Text file (*.txt)| *.txt";
+                LoadFileDialog.DefaultExt = "*.txt";
 
-                TimerTextBox.Text = root.Attributes["Timer"].Value;
-                OrigTime = (int)System.TimeSpan.Parse(root.Attributes["Timer"].Value).TotalSeconds;
-                BaseScoreTextBlock.Text = root.Attributes["Score"].Value;
-                BaseScore = int.Parse(root.Attributes["Score"].Value);
-
-                imageSource = root.Attributes["ImageSource"].Value;
-
-                var coreImage = new BitmapImage();
-                coreImage.BeginInit();
-                coreImage.UriSource = new Uri(imageSource);
-                coreImage.DecodePixelHeight = 420;
-                coreImage.DecodePixelWidth = 420;
-                coreImage.EndInit();
-
-                HintImage.Source = coreImage;
-
-                var coreImageWidth = 420;
-                croppedImageWidth = (int)coreImageWidth / 3;
-                croppedImageHeight = (int)(coreImageWidth * coreImage.Height / coreImage.Width) / 3;
-
-                for (int i = 0; i < 3; i++)
+                if (LoadFileDialog.ShowDialog() == true)
                 {
-                    var list = new List<PuzzlePiece>();
-                    for (int j = 0; j < 3; j++)
+                    var doc = new XmlDocument();
+                    doc.Load(LoadFileDialog.FileName);
+                    var root = doc.DocumentElement;
+                    puzzlePieceList = new List<List<PuzzlePiece>>();
+
+                    TimerTextBox.Text = root.Attributes["Timer"].Value;
+                    OrigTime = (int)System.TimeSpan.Parse(root.Attributes["Timer"].Value).TotalSeconds;
+                    BaseScoreTextBlock.Text = root.Attributes["Score"].Value;
+                    BaseScore = int.Parse(root.Attributes["Score"].Value);
+
+                    imageSource = root.Attributes["ImageSource"].Value;
+
+                    var coreImage = new BitmapImage();
+                    coreImage.BeginInit();
+                    coreImage.UriSource = new Uri(imageSource);
+                    coreImage.DecodePixelHeight = 420;
+                    coreImage.DecodePixelWidth = 420;
+                    coreImage.EndInit();
+
+                    HintImage.Source = coreImage;
+
+                    var coreImageWidth = 420;
+                    croppedImageWidth = (int)coreImageWidth / 3;
+                    croppedImageHeight = (int)(coreImageWidth * coreImage.Height / coreImage.Width) / 3;
+
+                    for (int i = 0; i < 3; i++)
                     {
-                        if (i != 2 || j != 2)
+                        var list = new List<PuzzlePiece>();
+                        for (int j = 0; j < 3; j++)
                         {
-                            var croppedImage = new CroppedBitmap(coreImage, new Int32Rect(
-                                    (int)(j * coreImage.Width / 3), (int)(i * coreImage.Height / 3),
-                                    (int)coreImage.Width / 3, (int)coreImage.Height / 3));
-                            var imagePiece = new PuzzlePiece() { image = new Image() { Source = croppedImage, Width = croppedImageWidth, Height = croppedImageHeight } };
-                            
-                            imagePiece.originalPos_X = j * (croppedImageWidth + croppedImagePadding);
-                            imagePiece.originalPos_Y = i * (croppedImageHeight + croppedImagePadding);
-                            imagePiece.numTag = new DogTag();
-                            imagePiece.numTag.cord_X = i;
-                            imagePiece.numTag.cord_Y = j;
-                            list.Add(imagePiece);
+                            if (i != 2 || j != 2)
+                            {
+                                var croppedImage = new CroppedBitmap(coreImage, new Int32Rect(
+                                        (int)(j * coreImage.Width / 3), (int)(i * coreImage.Height / 3),
+                                        (int)coreImage.Width / 3, (int)coreImage.Height / 3));
+                                var imagePiece = new PuzzlePiece() { image = new Image() { Source = croppedImage, Width = croppedImageWidth, Height = croppedImageHeight } };
+
+                                imagePiece.originalPos_X = j * (croppedImageWidth + croppedImagePadding);
+                                imagePiece.originalPos_Y = i * (croppedImageHeight + croppedImagePadding);
+                                imagePiece.numTag = new DogTag();
+                                imagePiece.numTag.cord_X = i;
+                                imagePiece.numTag.cord_Y = j;
+                                list.Add(imagePiece);
+                            }
+                        }
+                        puzzlePieceList.Add(list);
+                    }
+                    int k = 0;
+                    for (int i = 0; i < 3; i++)
+                    {
+                        for (int j = 0; j < 3; j++)
+                        {
+                            var tag = (root.FirstChild.ChildNodes[k].Attributes["Tag"].Value).Split(',');
+                            var originalPos = root.FirstChild.ChildNodes[k].Attributes["Original_Position"].Value.Split(',');
+                            var newPos = root.FirstChild.ChildNodes[k].Attributes["New_Position"].Value.Split(',');
+
+                            int tag_X = int.Parse(tag[0]);
+                            int tag_Y = int.Parse(tag[1]);
+                            if (originalPos[0] == "null")
+                            {
+                                scrambledList[i][j] = null;
+                            }
+                            else
+                            {
+                                scrambledList[i][j] = puzzlePieceList[tag_X][tag_Y];
+                                scrambledList[i][j].originalPos_X = int.Parse(originalPos[0]);
+                                scrambledList[i][j].originalPos_Y = int.Parse(originalPos[1]);
+                                scrambledList[i][j].newPos_X = int.Parse(newPos[0]);
+                                scrambledList[i][j].newPos_Y = int.Parse(newPos[1]);
+                                container.Children.Add(scrambledList[i][j].image);
+                                Canvas.SetLeft(scrambledList[i][j].image, scrambledList[i][j].newPos_X);
+                                Canvas.SetTop(scrambledList[i][j].image, scrambledList[i][j].newPos_Y);
+                            }
+                            k++;
                         }
                     }
-                    puzzlePieceList.Add(list);
-                }
-                int k = 0;
-                for (int i = 0; i < 3; i++)
-                {
-                    for (int j = 0; j < 3; j++)
+
+                    //ENABLE BUTTON
+                    if (puzzlePieceList.Count != 0)
                     {
-                        var tag = (root.FirstChild.ChildNodes[k].Attributes["Tag"].Value).Split(',');
-                        var originalPos = root.FirstChild.ChildNodes[k].Attributes["Original_Position"].Value.Split(',');
-                        var newPos = root.FirstChild.ChildNodes[k].Attributes["New_Position"].Value.Split(',');
-
-                        int tag_X = int.Parse(tag[0]);
-                        int tag_Y = int.Parse(tag[1]);
-                        if (originalPos[0]=="null")
-                        {
-                            scrambledList[i][j] = null;
-                        }
-                        else
-                        {
-                            scrambledList[i][j] = puzzlePieceList[tag_X][tag_Y];
-                            scrambledList[i][j].originalPos_X = int.Parse(originalPos[0]);
-                            scrambledList[i][j].originalPos_Y = int.Parse(originalPos[1]);
-                            scrambledList[i][j].newPos_X = int.Parse(newPos[0]);
-                            scrambledList[i][j].newPos_Y = int.Parse(newPos[1]);
-                            container.Children.Add(scrambledList[i][j].image);
-                            Canvas.SetLeft(scrambledList[i][j].image, scrambledList[i][j].newPos_X);
-                            Canvas.SetTop(scrambledList[i][j].image, scrambledList[i][j].newPos_Y);
-                        }
-                        k++;
+                        StartButton.IsEnabled = true;
+                        HintButton.IsEnabled = true;
+                        SaveButton.IsEnabled = true;
                     }
-                }
-
-                //ENABLE BUTTON
-                if (puzzlePieceList.Count != 0)
-                {
-                    StartButton.IsEnabled = true;
-                    HintButton.IsEnabled = true;
-                    SaveButton.IsEnabled = true;
                 }
             }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+            
         }
 
         private void clearCanvas()
