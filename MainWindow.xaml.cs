@@ -393,8 +393,8 @@ namespace _8PuzzleProject
                 return;
             }
             //
-            var j = (int)((position.X - canvasLeftPadding) / (croppedImageWidth + croppedImagePadding));
-            var i = (int)((position.Y - canvasTopPadding) / (croppedImageHeight + croppedImagePadding));
+            var j = (int)Math.Floor((position.X - canvasLeftPadding) / (croppedImageWidth + croppedImagePadding));
+            var i = (int)Math.Floor((position.Y - canvasTopPadding) / (croppedImageHeight + croppedImagePadding));
             this.Title = $"{i} - {j}";
             if (!isAbleToMove(i, j))
                 return;
@@ -550,6 +550,9 @@ namespace _8PuzzleProject
             GetNullPosition(ref null_X, ref null_Y);
             //Debug.WriteLine($"{null_X} {null_Y}");
             //Debug.WriteLine($"{hori_X} {verti_Y}");
+            if (hori_X > 2 || verti_Y > 2)
+                return false;
+
             if ((hori_X + 1 == null_X && verti_Y == null_Y)
                 || (hori_X - 1 == null_X && verti_Y == null_Y)
                 || (hori_X == null_X && verti_Y + 1 == null_Y)
