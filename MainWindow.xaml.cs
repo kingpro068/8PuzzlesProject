@@ -166,7 +166,7 @@ namespace _8PuzzleProject
             try
             {
                 var screen = new OpenFileDialog();
-                screen.Filter = "Image files (*.jpg, *.jpeg, *.jpe, *.jfif, *.png) | *.jpg; *.jpeg; *.jpe; *.jfif; *.png";
+                screen.Filter = "Image files (*.BMP;*.DIB;*.RLE;*.JPG;*.JPEG;*.JPE;*.JFIF;*.GIF;*.TIF;*.TIFF;*.PNG) | *.BMP;*.DIB;*.RLE;*.JPG;*.JPEG;*.JPE;*.JFIF;*.GIF;*.TIF;*.TIFF;*.PNG";
                 screen.DefaultExt = "*.png";
                 if (screen.ShowDialog() == true)
                 {
