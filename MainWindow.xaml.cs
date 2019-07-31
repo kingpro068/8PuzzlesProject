@@ -85,6 +85,11 @@ namespace _8PuzzleProject
 
         private void KeyDownHandler(object sender, KeyEventArgs e)
         {
+            if (isDragging)
+            {
+                return;
+            }
+
             if (isStart && isEnded == false)
             {
                 int null_X = 0;
@@ -367,7 +372,6 @@ namespace _8PuzzleProject
 
             if (isEnded)
             {
-                MessageBox.Show("YOU WIN!!");
                 isEnded = false;
                 timerX.Stop();
                 StartButton.Content = "Start";
@@ -375,6 +379,7 @@ namespace _8PuzzleProject
                 StartButton.IsEnabled = false;
                 SaveButton.IsEnabled = false;
                 HintButton.IsEnabled = false;
+                MessageBox.Show("YOU WIN!!");
             }
         }
 
@@ -535,11 +540,11 @@ namespace _8PuzzleProject
                 timerX.Stop();
                 StartButton.Content = "Start";
                 TimerTextBox.IsReadOnly = false;
-                MessageBox.Show("TIME UP!!");
-                MessageBox.Show("Please press New Game to play again");
                 isEnded = true;
                 StartButton.IsEnabled = false;
                 SaveButton.IsEnabled = false;
+                MessageBox.Show("TIME UP!!");
+                MessageBox.Show("Please press New Game to play again");
             }
         }
 
