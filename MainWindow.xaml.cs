@@ -19,6 +19,7 @@ using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Xml;
 using System.Windows.Controls.Primitives;
+using System.Drawing.Drawing2D;
 
 namespace _8PuzzleProject
 {
@@ -182,9 +183,11 @@ namespace _8PuzzleProject
                     var coreImage = new BitmapImage();
                     //Resize Image
                     coreImage.BeginInit();
-                    coreImage.UriSource = new Uri(screen.FileName);
+                    coreImage.CacheOption = BitmapCacheOption.OnLoad;
+                    coreImage.CreateOptions = BitmapCreateOptions.IgnoreColorProfile;
                     coreImage.DecodePixelHeight = 420;
                     coreImage.DecodePixelWidth = 420;
+                    coreImage.StreamSource = new MemoryStream(File.ReadAllBytes(new Uri(imageSource).AbsolutePath));
                     coreImage.EndInit();
 
                     HintImage.Source = coreImage;
@@ -201,8 +204,9 @@ namespace _8PuzzleProject
                             if (i != 2 || j != 2)
                             {
                                 var croppedImage = new CroppedBitmap(coreImage, new Int32Rect(
-                                        (int)(j * coreImage.Width / 3), (int)(i * coreImage.Height / 3),
-                                        (int)coreImage.Width / 3, (int)coreImage.Height / 3));
+                                        (int)(j * coreImage.PixelWidth / 3), (int)(i * coreImage.PixelHeight / 3),
+                                        (int)coreImage.PixelWidth / 3, (int)coreImage.PixelHeight / 3));
+
                                 var imagePiece = new PuzzlePiece() { image = new Image() { Source = croppedImage, Width = croppedImageWidth, Height = croppedImageHeight } };
                                 container.Children.Add(imagePiece.image);
                                 imagePiece.originalPos_X = j * (croppedImageWidth + croppedImagePadding);
@@ -656,10 +660,19 @@ namespace _8PuzzleProject
                     imageSource = root.Attributes["ImageSource"].Value;
 
                     var coreImage = new BitmapImage();
+                    //using (Graphics graphics = Graphics.FromImage(coreImage))
+                    //{
+                    //    graphics.CompositingQuality = CompositingQuality.HighQuality;
+                    //    graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                    //    graphics.SmoothingMode = SmoothingMode.HighQuality;
+                    //    graphics.DrawImage(coreImage)
+                    //}
                     coreImage.BeginInit();
-                    coreImage.UriSource = new Uri(imageSource);
+                    coreImage.CacheOption = BitmapCacheOption.None;
+                    coreImage.CreateOptions = BitmapCreateOptions.IgnoreColorProfile;
                     coreImage.DecodePixelHeight = 420;
                     coreImage.DecodePixelWidth = 420;
+                    coreImage.StreamSource = new MemoryStream(File.ReadAllBytes(new Uri(imageSource).AbsolutePath));
                     coreImage.EndInit();
 
                     HintImage.Source = coreImage;
