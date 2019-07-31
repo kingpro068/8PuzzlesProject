@@ -34,7 +34,7 @@ namespace _8PuzzleProject
             public int cord_Y { get; set; }
         }
 
-        int canvasLeftPadding = 52;
+        int canvasLeftPadding = 58;
         int canvasTopPadding = 42;
         bool isDragging = false;
         PuzzlePiece selectedPiece = null;
@@ -389,6 +389,7 @@ namespace _8PuzzleProject
 
         private void Container_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
+
             if (!isStart || isEnded)
             {
                 return;
@@ -437,10 +438,14 @@ namespace _8PuzzleProject
 
                 if (newPos.X < leftBorder || newPos.X > rightBorder || newPos.Y < topBorder || newPos.Y > bottomBorder)
                 {
+                    Canvas.SetLeft(selectedPiece.image, selectedPiece.newPos_X);
+                    Canvas.SetTop(selectedPiece.image, selectedPiece.newPos_Y);
+                    scrambledList[(int)(selectedPiece.newPos_Y / (croppedImageHeight + croppedImagePadding))][(int)(selectedPiece.newPos_X / (croppedImageWidth + croppedImagePadding))] = selectedPiece;
+                    selectedPiece = null;
                     return;
                 }
-                Canvas.SetLeft(selectedPiece.image, newPos.X - canvasLeftPadding);
-                Canvas.SetTop(selectedPiece.image, newPos.Y - canvasTopPadding);
+                Canvas.SetLeft(selectedPiece.image, newPos.X - canvasLeftPadding - croppedImagePadding);
+                Canvas.SetTop(selectedPiece.image, newPos.Y - topBorder + croppedImagePadding);
                 newi = i;
                 newj = j;
             }
@@ -454,6 +459,10 @@ namespace _8PuzzleProject
             isDragging = false;
             if (newi > 2 || newi < 0 || newj > 2 || newj < 0)
             {
+                Canvas.SetLeft(selectedPiece.image, selectedPiece.newPos_X);
+                Canvas.SetTop(selectedPiece.image, selectedPiece.newPos_Y);
+                scrambledList[(int)(selectedPiece.newPos_Y / (croppedImageHeight + croppedImagePadding))][(int)(selectedPiece.newPos_X / (croppedImageWidth + croppedImagePadding))] = selectedPiece;
+                selectedPiece = null;
                 return;
             }
             if (scrambledList[newi][newj] == null)
@@ -640,13 +649,13 @@ namespace _8PuzzleProject
         {
             try
             {
-                clearCanvas();
                 var LoadFileDialog = new OpenFileDialog();
                 LoadFileDialog.Filter = "Text file (*.txt)| *.txt";
                 LoadFileDialog.DefaultExt = "*.txt";
 
                 if (LoadFileDialog.ShowDialog() == true)
                 {
+                    clearCanvas();
                     var doc = new XmlDocument();
                     doc.Load(LoadFileDialog.FileName);
                     var root = doc.DocumentElement;
